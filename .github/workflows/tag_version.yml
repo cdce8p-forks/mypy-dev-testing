@@ -52,7 +52,7 @@ jobs:
           if [[ "${{ inputs.beta }}" == 'true' ]]; then
             args="--beta"
           fi
-          next_version=$(python scripts/next_version.py "${args}")
+          next_version=$(python scripts/next_version.py ${args})
           echo "Next version: ${next_version}"
           echo "next_version=${next_version}" >> $GITHUB_OUTPUT
       - name: Commit and push
