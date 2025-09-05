@@ -6,7 +6,7 @@ on:
       name:
         type: string
         required: true
-        default: 1.18.0a8
+        default: 1.18.0a10
       commit:
         type: string
         default: origin/master
@@ -37,7 +37,7 @@ jobs:
           git config --global user.email "${{ vars.BOT_EMAIL }}"
       - name: Fetch and checkout
         run: |
-          git -C mypy fetch origin --no-tags -t master
+          git -C mypy fetch --no-tags origin -t master
           echo "---"
           git -C mypy checkout --detach ${{ inputs.commit }}
       # - name: Get new tag version
