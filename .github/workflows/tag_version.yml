@@ -3,10 +3,6 @@ name: Tag version
 on:
   workflow_dispatch:
     inputs:
-      name:
-        type: string
-        required: true
-        default: 1.18.0a10
       beta:
         description: "Beta release"
         type: boolean
@@ -49,19 +45,19 @@ jobs:
           git -C mypy fetch origin -t master
           git -C mypy checkout ${{ inputs.ref }}
       - name: Get new tag version
-        id: new-tag
+        id: next
         run: |
           if [[ "${{ inputs.beta }}" == 'true' ]]; then
             args="--beta"
           fi
-          next_version=$(python scripts/next_version.py ${args})
-          echo "Next version: ${next_version}"
-          echo "next_version=${next_version}" >> $GITHUB_OUTPUT
+          version=$(python scripts/next_version.py ${args})
+          echo "Next version: ${version}"
+          echo "version=${version}" >> $GITHUB_OUTPUT
       - name: Commit and push
-        if: false
+        # if: false
         run: |
           git add --update
-          git commit -m "Update mypy commit"
-          tag_name="${{ inputs.name }}"
-          git tag "${tag_name}"  # TODO <= !!
+          # git commit -m "Update mypy commit"
+          tag_name="${{ steps.next.outputs.version }}"
+          git tag "${tag_name}"
           git push origin main "${tag_name}"
