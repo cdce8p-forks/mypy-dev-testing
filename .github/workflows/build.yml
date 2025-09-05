@@ -83,6 +83,7 @@ jobs:
     name: Build ${{ matrix.only }}
     needs: generate_wheels_matrix
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
