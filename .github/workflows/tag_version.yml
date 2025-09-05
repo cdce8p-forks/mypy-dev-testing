@@ -8,7 +8,7 @@ on:
         required: true
       commit:
         type: string
-        default: HEAD
+        default: origin/master
 
 jobs:
   tag_version:
