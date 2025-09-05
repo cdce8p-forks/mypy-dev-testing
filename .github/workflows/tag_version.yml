@@ -10,8 +10,6 @@ on:
       ref:
         description: "Git ref"
         type: string
-        required: true
-        default: origin/master
 
 jobs:
   tag_version:
@@ -43,7 +41,7 @@ jobs:
           GIT_ADVICE: 0
         run: |
           git -C mypy fetch origin -t master
-          git -C mypy checkout ${{ inputs.ref }}
+          git -C mypy checkout ${{ inputs.ref || 'origin/master' }}
       - name: Get new tag version
         id: next
         run: |
