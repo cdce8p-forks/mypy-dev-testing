@@ -6,43 +6,47 @@ on:
       name:
         type: string
         required: true
+        default: 1.18.0a8
       commit:
         type: string
         default: origin/master
+        required: true
 
 jobs:
   tag_version:
     name: Tag new mypy-dev version
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    # permissions:
+    #   contents: write
     steps:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.13"
-      # - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
-      #   id: app-token
-      #   with:
-      #     app-id: ${{ vars.APP_ID }}
-      #     private-key: ${{ secrets.PRIVATE_KEY }}
-      #     permission-contents: write # push branch to Github
+      - uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          permission-contents: write # push branch to Github
       - uses: actions/checkout@v5
         with:
           submodules: recursive
           # token: ${{ steps.app-token.outputs.token }}
-      # - name: Set git config
-      #   run: |
-      #     git config --global user.name "${{ vars.BOT_NAME }}"
-      #     git config --global user.email "${{ vars.BOT_EMAIL }}"
       - name: Set git config
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config --global user.name "${{ vars.BOT_NAME }}"
+          git config --global user.email "${{ vars.BOT_EMAIL }}"
+      # - name: Set git config
+      #   run: |
+      #     git config --global user.name 'github-actions[bot]'
+      #     git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Fetch and checkout
         run: |
-          git -C mypy fetch origin --no-tags -t master
+          git -C mypy fetch --no-tags origin -t master
+          echo "---"
           git -C mypy checkout ${{ inputs.commit }}
+          echo "---"
           git -C mypy log --oneline
       # - name: Get new tag version
       #   id: new-tag
@@ -50,11 +54,18 @@ jobs:
       - name: Commit and push
         run: |
           git status
+          echo "---"
           git add --update
+          echo "---"
           git status
+          echo "---"
           git commit -m "Update mypy commit"
-          git log
+          echo "---"
+          git log --oneline
+          echo "---"
           tag_name="${{ inputs.name }}"
           git tag "${tag_name}"  # TODO <= !!
+          echo "---"
           git log --oneline
+          echo "---"
           git push origin main "${tag_name}"
