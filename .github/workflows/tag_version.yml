@@ -37,13 +37,15 @@ jobs:
           git config --global user.email "${{ vars.BOT_EMAIL }}"
       - name: Fetch and checkout
         run: |
-          git -C mypy fetch --no-tags origin -t master
+          git config remote.origin.tagOpt --no-tags
+          git -C mypy fetch origin -t master
           echo "---"
           git -C mypy checkout --detach ${{ inputs.commit }}
       # - name: Get new tag version
       #   id: new-tag
       #   run: python scripts/new_tag.py
       - name: Commit and push
+        if: false
         run: |
           git add --update
           git commit -m "Update mypy commit"
