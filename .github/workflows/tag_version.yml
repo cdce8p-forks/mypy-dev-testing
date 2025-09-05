@@ -43,13 +43,18 @@ jobs:
         run: |
           git -C mypy fetch origin -t master
           git -C mypy checkout ${{ inputs.commit }}
+          git -C mypy log -1
       # - name: Get new tag version
       #   id: new-tag
       #   run: python scripts/new_tag.py
       - name: Commit and push
         run: |
+          git status
           git add --update
+          git status
           git commit -m "Update mypy commit"
+          git log
           tag_name="${{ inputs.name }}"
           git tag "${tag_name}"  # TODO <= !!
+          git log -1
           git push origin main "${tag_name}"
