@@ -41,7 +41,7 @@ jobs:
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Fetch and checkout
         run: |
-          git -C mypy fetch origin -t master
+          git -C mypy fetch origin --no-tags -t master
           git -C mypy checkout ${{ inputs.commit }}
           git -C mypy log -1
       # - name: Get new tag version
