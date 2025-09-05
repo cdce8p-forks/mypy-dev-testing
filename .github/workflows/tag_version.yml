@@ -7,10 +7,15 @@ on:
         type: string
         required: true
         default: 1.18.0a10
-      commit:
+      beta:
+        description: "Beta release"
+        type: boolean
+        default: false
+      ref:
+        description: "Git ref"
         type: string
-        default: origin/master
         required: true
+        default: origin/master
 
 jobs:
   tag_version:
@@ -36,14 +41,20 @@ jobs:
           git config --global user.name "${{ vars.BOT_NAME }}"
           git config --global user.email "${{ vars.BOT_EMAIL }}"
       - name: Fetch and checkout
+        env:
+          GIT_ADVICE: 0
         run: |
-          git config remote.origin.tagOpt --no-tags
           git -C mypy fetch origin -t master
-          echo "---"
-          git -C mypy checkout --detach ${{ inputs.commit }}
-      # - name: Get new tag version
-      #   id: new-tag
-      #   run: python scripts/new_tag.py
+          git -C mypy checkout ${{ inputs.ref }}
+      - name: Get new tag version
+        id: new-tag
+        run: |
+          if [[ "${{ inputs.beta }}" == 'true' ]]; then
+            args="--beta"
+          fi
+          next_version=$(python scripts/next_version.py "${args}")
+          echo "Next version: ${next_version}"
+          echo "next_version=${next_version}" >> $GITHUB_OUTPUT
       - name: Commit and push
         if: false
         run: |
