@@ -43,7 +43,7 @@ jobs:
         run: |
           git -C mypy fetch origin --no-tags -t master
           git -C mypy checkout ${{ inputs.commit }}
-          git -C mypy log -1
+          git -C mypy log --oneline
       # - name: Get new tag version
       #   id: new-tag
       #   run: python scripts/new_tag.py
@@ -56,5 +56,5 @@ jobs:
           git log
           tag_name="${{ inputs.name }}"
           git tag "${tag_name}"  # TODO <= !!
-          git log -1
+          git log --oneline
           git push origin main "${tag_name}"
