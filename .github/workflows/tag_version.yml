@@ -16,8 +16,6 @@ jobs:
   tag_version:
     name: Tag new mypy-dev version
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write
     steps:
       - uses: actions/setup-python@v6
         name: Install Python
@@ -37,35 +35,18 @@ jobs:
         run: |
           git config --global user.name "${{ vars.BOT_NAME }}"
           git config --global user.email "${{ vars.BOT_EMAIL }}"
-      # - name: Set git config
-      #   run: |
-      #     git config --global user.name 'github-actions[bot]'
-      #     git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Fetch and checkout
         run: |
-          git -C mypy fetch origin -t master
+          git -C mypy fetch origin --no-tags -t master
           echo "---"
           git -C mypy checkout --detach ${{ inputs.commit }}
-          echo "---"
-          git -C mypy log --oneline
       # - name: Get new tag version
       #   id: new-tag
       #   run: python scripts/new_tag.py
       - name: Commit and push
         run: |
-          git status
-          echo "---"
           git add --update
-          echo "---"
-          git status
-          echo "---"
           git commit -m "Update mypy commit"
-          echo "---"
-          git log --oneline
-          echo "---"
           tag_name="${{ inputs.name }}"
           git tag "${tag_name}"  # TODO <= !!
-          echo "---"
-          git log --oneline
-          echo "---"
           git push origin main "${tag_name}"
