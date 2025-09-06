@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 import re
 import shlex
@@ -11,8 +13,20 @@ from typing import Final
 
 
 MYPY_VERSION_FILE: Final = "mypy/mypy/version.py"
-ALPHA: Final = "a"
-BETA: Final = "b"
+VERSION_PATTERN = re.compile(r"(\d+)\.(\d+)\.(\d+)([ab])(\d+)")
+
+class PreRelease(StrEnum):
+    ALPHA = "a"
+    BETA = "b"
+
+
+@dataclass(order=True)
+class VersionType:
+    major: int
+    minor: int
+    patch: int
+    pre: PreRelease
+    n: int
 
 
 def read_mypy_version_from_file() -> str:
@@ -22,27 +36,28 @@ def read_mypy_version_from_file() -> str:
     return version
 
 
-def read_existing_tags(prefix: str | None = None) -> list[str]:
+def parse_version(s: str) -> VersionType:
+    major, minor, patch, pre, n = VERSION_PATTERN.match(s).groups()
+    return VersionType(int(major), int(minor), int(patch), PreRelease(pre), int(n))
+
+
+def read_existing_tags(prefix: str) -> list[VersionType]:
     proc = subprocess.run(shlex.split("git tag --list"), capture_output=True)
-    stdout = sorted(proc.stdout.decode().splitlines())
-    if prefix is not None:
-        return [item for item in stdout if item.startswith(prefix)]
-    return stdout
+    stdout = sorted(proc.stdout.decode().splitlines(), key=lambda s: parse_version(s))
+    return sorted([parse_version(item) for item in stdout if item.startswith(prefix)])
 
 
-def find_next_version(version: str, tags: list[str], beta: bool = False) -> str:
+def find_next_version(version: str, tags: list[VersionType], beta: bool = False) -> str:
     match tags:
-        case [*_, last_release]:
-            last_suffix = last_release.removeprefix(version)
-            pre, v = re.match(r"(\w)(\d+)", last_suffix).groups()
-            v = int(v) + 1
+        case [*_, VersionType(pre=pre, n=n)]:
+            n += 1
         case _:
-            pre = ALPHA
-            v = 1
-    if beta and pre == ALPHA:
-        pre = BETA
-        v = 1
-    return f"{version}{pre}{v}"
+            pre = PreRelease.ALPHA
+            n = 1
+    if beta and pre is PreRelease.ALPHA:
+        pre = PreRelease.BETA
+        n = 1
+    return f"{version}{pre}{n}"
 
 
 def main(argv: Sequence[str] | None = None) -> int:
