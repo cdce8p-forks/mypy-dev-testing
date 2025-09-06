@@ -64,14 +64,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     argv = argv or sys.argv[1:]
     parser = argparse.ArgumentParser()
     parser.add_argument("--beta", action=argparse.BooleanOptionalAction)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
     version = read_mypy_version_from_file()
-    # version = "1.9.0"
-    version = "1.18.0"
-    # version = "1.19.0"
     tags = read_existing_tags(version)
-    # print(tags)
     next_version = find_next_version(version, tags, args.beta)
+
     print(next_version)
     return 0
 
